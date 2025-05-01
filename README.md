@@ -1,22 +1,43 @@
-# iCloud Android
+# iCloud for Android
 
-在您的 Android 手机上访问 iCloud.
+Access your iCloud content directly from your Android device.
 
-## 权限
+## Features
 
-应用需要以下权限：
+- Access iCloud Mail, Calendar, Photos, and more
+- Seamless synchronization with your Apple devices
+- User-friendly interface
 
-- INTERNET: 用于访问iCloud网站
-- ACCESS_NETWORK_STATE: 用于检测网络状态
-- POST_NOTIFICATIONS: 用于显示邮件通知
-- RECEIVE_BOOT_COMPLETED: 用于在设备启动时启动服务
+## Permissions
 
-## 构建方法
+This app requires the following permissions:
 
-1. 克隆或下载本仓库
-2. 使用Android Studio打开项目
-3. 使用Gradle构建项目并安装到设备上
+- `INTERNET`: To access iCloud services
+- `ACCESS_NETWORK_STATE`: To monitor network connectivity
+- `POST_NOTIFICATIONS`: To display mail notifications
+- `RECEIVE_BOOT_COMPLETED`: To start services when device boots
 
-## 贡献
+## Getting Started
 
-欢迎提交Issues和Pull Requests。 
+### Prerequisites
+
+- Android Studio
+- Android SDK
+- JDK 11 or higher
+
+### Installation
+
+1. Clone this repository
+   ```bash
+   git clone https://github.com/Chieko-Seren/iCloud-Android.git
+   ```
+2. Open the project in Android Studio
+3. Build and run the app on your device
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues and pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 
