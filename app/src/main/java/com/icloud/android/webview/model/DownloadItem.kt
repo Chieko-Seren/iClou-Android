@@ -24,20 +24,20 @@ data class DownloadItem(
         
         fun getStatusText(status: Int): String {
             return when (status) {
-                STATUS_PENDING -> "等待中"
-                STATUS_DOWNLOADING -> "下载中"
-                STATUS_PAUSED -> "已暂停"
-                STATUS_COMPLETED -> "已完成"
-                STATUS_CANCELLED -> "已取消"
-                STATUS_FAILED -> "下载失败"
-                else -> "未知状态"
+                STATUS_PENDING -> "Pending"
+                STATUS_DOWNLOADING -> "Downloading"
+                STATUS_PAUSED -> "Paused"
+                STATUS_COMPLETED -> "Completed"
+                STATUS_CANCELLED -> "Cancelled"
+                STATUS_FAILED -> "Failed"
+                else -> "Unknown Status"
             }
         }
     }
     
     fun getFormattedSize(): String {
         return if (totalSize <= 0) {
-            "未知大小"
+            "Unknown Size"
         } else {
             formatFileSize(downloadedSize) + " / " + formatFileSize(totalSize)
         }

@@ -47,7 +47,7 @@
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/progressBar"
-            tools:text="下载中" />
+            tools:text="Downloading" />
 
         <TextView
             android:id="@+id/sizeText"
@@ -76,7 +76,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="取消"
+                android:text="Cancel"
                 android:textColor="@android:color/holo_red_dark" />
 
             <Button
@@ -85,7 +85,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="打开"
+                android:text="Open"
                 android:textColor="@android:color/holo_blue_dark"
                 android:visibility="gone" />
 

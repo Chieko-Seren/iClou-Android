@@ -46,29 +46,27 @@ class DownloadAdapter(
                 statusText.text = DownloadItem.getStatusText(item.status)
                 sizeText.text = item.getFormattedSize()
 
-                // 设置按钮状态和文本
                 when (item.status) {
                     DownloadItem.STATUS_DOWNLOADING, DownloadItem.STATUS_PENDING -> {
-                        actionButton.text = "取消"
+                        actionButton.text = "Cancel"
                         actionButton.setTextColor(actionButton.context.getColor(android.R.color.holo_red_dark))
                         actionButton.visibility = View.VISIBLE
                         openButton.visibility = View.GONE
                     }
                     DownloadItem.STATUS_COMPLETED -> {
-                        actionButton.text = "删除"
+                        actionButton.text = "Delete"
                         actionButton.setTextColor(actionButton.context.getColor(android.R.color.holo_red_dark))
                         actionButton.visibility = View.VISIBLE
                         openButton.visibility = View.VISIBLE
                     }
                     DownloadItem.STATUS_FAILED, DownloadItem.STATUS_CANCELLED -> {
-                        actionButton.text = "重试"
+                        actionButton.text = "Retry"
                         actionButton.setTextColor(actionButton.context.getColor(android.R.color.holo_blue_dark))
                         actionButton.visibility = View.VISIBLE
                         openButton.visibility = View.GONE
                     }
                 }
 
-                // 设置按钮点击事件
                 actionButton.setOnClickListener {
                     onCancelClicked(item)
                 }

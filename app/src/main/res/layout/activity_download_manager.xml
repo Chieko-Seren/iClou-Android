@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="下载管理器" />
+        app:title="Download Manager" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -32,7 +32,7 @@
         android:id="@+id/emptyView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="没有下载记录"
+        android:text="No downloads"
         android:textSize="16sp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"

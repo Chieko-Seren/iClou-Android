@@ -34,12 +34,12 @@ class AppleAuthHandler(private val context: Context) {
                 
                 // 验证状态参数，防止CSRF攻击
                 if (state != authState) {
-                    Log.e(TAG, "State不匹配，可能遭受CSRF攻击")
-                    return AppleAuthResult(success = false, error = "安全验证失败")
+                    Log.e(TAG, "State mismatch, possible CSRF attack")
+                    return AppleAuthResult(success = false, error = "Security verification failed")
                 }
                 
                 if (error != null) {
-                    Log.e(TAG, "认证错误: $error")
+                    Log.e(TAG, "Authentication error: $error")
                     return AppleAuthResult(success = false, error = error)
                 }
                 
@@ -50,11 +50,11 @@ class AppleAuthHandler(private val context: Context) {
                 }
                 
             } catch (e: Exception) {
-                Log.e(TAG, "处理回调数据出错", e)
-                return AppleAuthResult(success = false, error = "处理认证回调数据出错")
+                Log.e(TAG, "Error processing callback data", e)
+                return AppleAuthResult(success = false, error = "Error processing authentication callback data")
             }
             
-            return AppleAuthResult(success = false, error = "无效的回调数据")
+            return AppleAuthResult(success = false, error = "Invalid callback data")
         }
     }
     
@@ -87,7 +87,7 @@ class AppleAuthHandler(private val context: Context) {
             
             return true
         } catch (e: Exception) {
-            Log.e(TAG, "启动认证流程出错", e)
+            Log.e(TAG, "Error starting authentication flow", e)
             return false
         }
     }
@@ -104,7 +104,7 @@ class AppleAuthHandler(private val context: Context) {
                     const appleButtons = document.querySelectorAll('button[aria-label*="Apple"], button[id*="apple"], a[href*="appleid.apple.com"]');
                     
                     if (appleButtons.length > 0) {
-                        console.log('找到Apple登录按钮，注入处理器');
+                        console.log('Found Apple login buttons, injecting handler');
                         
                         appleButtons.forEach(button => {
                             button.addEventListener('click', function(e) {
@@ -159,14 +159,14 @@ class AppleAuthHandler(private val context: Context) {
                     
                     return true;
                 } catch(e) {
-                    console.error('设置授权数据出错:', e);
+                    console.error('Error setting authorization data:', e);
                     return false;
                 }
             })();
         """.trimIndent()
         
         webView.evaluateJavascript(script) { result ->
-            Log.d(TAG, "授权码设置结果: $result")
+            Log.d(TAG, "Authorization code setting result: $result")
         }
     }
 }

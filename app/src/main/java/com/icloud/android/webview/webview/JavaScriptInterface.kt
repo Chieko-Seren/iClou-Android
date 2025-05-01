@@ -40,7 +40,7 @@ class JavaScriptInterface(private val context: Context) {
     fun downloadFile(url: String, suggestedFilename: String = "") {
         // 检查URL是否有效
         if (url.isBlank()) {
-            Toast.makeText(context, "无效的下载链接", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Invalid download URL", Toast.LENGTH_SHORT).show()
             return
         }
         
@@ -55,7 +55,7 @@ class JavaScriptInterface(private val context: Context) {
         context.startService(intent)
         
         val fileName = if (suggestedFilename.isNotBlank()) suggestedFilename else url.substringAfterLast('/')
-        Toast.makeText(context, "开始下载: $fileName", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Started download: $fileName", Toast.LENGTH_SHORT).show()
     }
     
     @JavascriptInterface

@@ -67,10 +67,10 @@ class DownloadService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "下载通知",
+                "Download Notifications",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "用于显示文件下载进度"
+                description = "Displays file download progress"
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -79,8 +79,8 @@ class DownloadService : Service() {
     private fun createNotificationBuilder(): NotificationCompat.Builder {
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download)
-            .setContentTitle("文件下载")
-            .setContentText("下载中...")
+            .setContentTitle("File Download")
+            .setContentText("Downloading...")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
     }
@@ -91,7 +91,6 @@ class DownloadService : Service() {
                 val url = intent.getStringExtra(EXTRA_URL) ?: return START_NOT_STICKY
                 val fileName = intent.getStringExtra(EXTRA_FILE_NAME) ?: getFileNameFromUrl(url)
                 
-                // 检查是否已经在下载
                 if (activeDownloads[url] == true) {
                     return START_STICKY
                 }
@@ -111,10 +110,8 @@ class DownloadService : Service() {
                 downloadList.add(downloadItem)
                 activeDownloads[url] = true
                 
-                // 更新UI
                 sendBroadcast(DOWNLOAD_UPDATE, downloadItem)
                 
-                // 启动下载
                 startDownload(downloadItem)
                 
                 return START_STICKY
@@ -131,11 +128,9 @@ class DownloadService : Service() {
     private fun startDownload(downloadItem: DownloadItem) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // 更新状态
                 downloadItem.status = DownloadItem.STATUS_DOWNLOADING
                 sendBroadcast(DOWNLOAD_UPDATE, downloadItem)
                 
-                // 创建下载目录
                 val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 val iCloudDir = File(downloadDir, "iCloud")
                 if (!iCloudDir.exists()) {
@@ -144,7 +139,6 @@ class DownloadService : Service() {
                 
                 val file = File(iCloudDir, downloadItem.fileName)
                 
-                // 开始下载
                 val url = URL(downloadItem.url)
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
@@ -167,7 +161,6 @@ class DownloadService : Service() {
                 
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                     if (activeDownloads[downloadItem.url] != true) {
-                        // 下载被取消
                         inputStream.close()
                         outputStream.close()
                         file.delete()
@@ -177,7 +170,6 @@ class DownloadService : Service() {
                     outputStream.write(buffer, 0, bytesRead)
                     downloadedSize += bytesRead
                     
-                    // 更新进度
                     downloadItem.downloadedSize = downloadedSize
                     downloadItem.progress = if (totalSize > 0) {
                         ((downloadedSize * 100) / totalSize).toInt()
@@ -185,10 +177,8 @@ class DownloadService : Service() {
                         0
                     }
                     
-                    // 更新通知
                     updateNotification(downloadItem)
                     
-                    // 发送广播更新UI
                     if (downloadItem.progress % 5 == 0) {
                         sendBroadcast(DOWNLOAD_UPDATE, downloadItem)
                     }
@@ -197,19 +187,16 @@ class DownloadService : Service() {
                 inputStream.close()
                 outputStream.close()
                 
-                // 下载完成
                 downloadItem.status = DownloadItem.STATUS_COMPLETED
                 downloadItem.progress = 100
                 sendBroadcast(DOWNLOAD_COMPLETE, downloadItem)
                 
-                // 更新文件URI
                 downloadItem.fileUri = FileProvider.getUriForFile(
                     applicationContext,
                     "${applicationContext.packageName}.fileprovider",
                     file
                 ).toString()
                 
-                // 完成通知
                 showCompletionNotification(downloadItem)
                 
             } catch (e: Exception) {
@@ -231,7 +218,7 @@ class DownloadService : Service() {
     
     private suspend fun updateNotification(downloadItem: DownloadItem) = withContext(Dispatchers.Main) {
         val notification = notificationBuilder
-            .setContentTitle("下载中: ${downloadItem.fileName}")
+            .setContentTitle("Downloading: ${downloadItem.fileName}")
             .setContentText("${downloadItem.progress}%")
             .setProgress(100, downloadItem.progress, false)
             .build()
@@ -242,7 +229,7 @@ class DownloadService : Service() {
     private suspend fun showCompletionNotification(downloadItem: DownloadItem) = withContext(Dispatchers.Main) {
         val notification = NotificationCompat.Builder(this@DownloadService, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download_complete)
-            .setContentTitle("下载完成")
+            .setContentTitle("Download Complete")
             .setContentText(downloadItem.fileName)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)

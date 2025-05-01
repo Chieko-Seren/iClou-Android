@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">iCloud</string>
-    <string name="new_mail_notification">新邮件</string>
-    <string name="mail_notification_title">iCloud邮件</string>
-    <string name="mail_notification_content">您有%1$d封新邮件</string>
+    <string name="new_mail_notification">New Mail</string>
+    <string name="mail_notification_title">iCloud Mail</string>
+    <string name="mail_notification_content">You have %1$d new emails</string>
     
-    <!-- Apple登录相关 -->
     <string name="apple_login_client_id">com.icloud.android</string>
-    <string name="apple_login_success">Apple登录成功</string>
-    <string name="apple_login_failed">Apple登录失败: %s</string>
-    <string name="apple_login_cancelled">Apple登录已取消</string>
+    <string name="apple_login_success">Apple login successful</string>
+    <string name="apple_login_failed">Apple login failed: %s</string>
+    <string name="apple_login_cancelled">Apple login cancelled</string>
 </resources> 
