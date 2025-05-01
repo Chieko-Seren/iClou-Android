@@ -11,15 +11,32 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import android.widget.Toast
+import com.icloud.android.webview.auth.AppleAuthHandler
 import com.icloud.android.webview.service.DownloadService
 
-class ICloudWebClient(private val progressBar: ProgressBar) : WebViewClient() {
+class ICloudWebClient(
+    private val progressBar: ProgressBar,
+    private val appleAuthHandler: AppleAuthHandler? = null
+) : WebViewClient() {
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         // 处理文件下载请求
         val url = request?.url?.toString() ?: return false
         val contentDisposition = request.requestHeaders["Content-Disposition"]
         val mimeType = request.requestHeaders["Content-Type"]
+        
+        // 处理Apple登录重定向
+        if (url.startsWith("https://appleid.apple.com/") || url.contains("apple.com/auth")) {
+            // 让AppleAuthHandler处理此URL
+            appleAuthHandler?.let {
+                val clientId = view?.context?.resources?.getString(
+                    view.context.resources.getIdentifier("apple_login_client_id", "string", view.context.packageName)
+                ) ?: return false
+                
+                it.startAuth(clientId)
+                return true
+            }
+        }
         
         if (URLUtil.isNetworkUrl(url) && 
             (url.endsWith(".pdf") || url.endsWith(".doc") || url.endsWith(".docx") || 
@@ -44,6 +61,9 @@ class ICloudWebClient(private val progressBar: ProgressBar) : WebViewClient() {
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
         progressBar.visibility = View.GONE
+        
+        // 注入Apple登录处理代码
+        appleAuthHandler?.injectAppleLoginHandler(view ?: return)
         
         // 注入JavaScript检测邮件变化
         val mailCheckScript = """

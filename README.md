@@ -9,6 +9,7 @@ Access your iCloud content directly from your Android device.
 - User-friendly interface
 - File downloads with a built-in download manager
 - Support for various file types (PDF, Office documents, etc.)
+- Apple third-party login support
 
 ## Permissions
 
@@ -47,6 +48,13 @@ This app requires the following permissions:
    - Open completed downloads
    - Cancel ongoing downloads
    - Remove downloaded files
+
+## Apple Third-Party Login
+
+1. When you see an "Sign in with Apple" button in iCloud, the app will automatically detect it
+2. Tapping the button will open an external browser window for secure authentication
+3. After successful authentication, you'll be redirected back to the app
+4. Your authentication will be securely stored for future sessions
 
 ## Contributing
 

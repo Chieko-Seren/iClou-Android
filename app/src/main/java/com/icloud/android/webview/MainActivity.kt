@@ -3,29 +3,37 @@ package com.icloud.android.webview
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.CookieManager
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.icloud.android.webview.auth.AppleAuthHandler
+import com.icloud.android.webview.auth.AppleAuthResult
 import com.icloud.android.webview.databinding.ActivityMainBinding
 import com.icloud.android.webview.service.ICloudMailService
 import com.icloud.android.webview.webview.ICloudWebClient
 import com.icloud.android.webview.webview.ICloudWebChromeClient
 import com.icloud.android.webview.webview.JavaScriptInterface
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), JavaScriptInterface.AppleLoginListener {
 
     private lateinit var binding: ActivityMainBinding
     private val PERMISSION_REQUEST_CODE = 1001
     private val STORAGE_PERMISSION_REQUEST_CODE = 1002
     private val iCloudUrl = "https://www.icloud.com/"
+    
+    private lateinit var jsInterface: JavaScriptInterface
+    private lateinit var appleAuthHandler: AppleAuthHandler
+    private lateinit var webClient: ICloudWebClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,10 +42,48 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        
+        // 初始化Apple授权处理器
+        appleAuthHandler = AppleAuthHandler(this)
+        
         setupWebView()
         setupSwipeRefresh()
         checkPermissions()
         startMailService()
+        
+        // 处理从Apple登录回调
+        handleIntent(intent)
+    }
+    
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+    
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.action == Intent.ACTION_VIEW) {
+            val data = intent.data
+            if (data?.scheme == "com.icloud.android.callback") {
+                // 处理Apple授权回调
+                val result = AppleAuthHandler.handleCallback(data)
+                processAuthResult(result)
+            }
+        }
+    }
+    
+    private fun processAuthResult(result: AppleAuthResult?) {
+        if (result == null) return
+        
+        if (result.success && result.code != null) {
+            // 授权成功，在WebView中完成登录
+            Toast.makeText(this, getString(R.string.apple_login_success), Toast.LENGTH_SHORT).show()
+            appleAuthHandler.completeLogin(binding.webView, result.code)
+        } else {
+            // 授权失败
+            val errorMsg = result.error ?: getString(R.string.apple_login_cancelled)
+            Toast.makeText(this, getString(R.string.apple_login_failed, errorMsg), Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -74,10 +120,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 添加JavaScript接口
-        binding.webView.addJavascriptInterface(JavaScriptInterface(this), "Android")
+        jsInterface = JavaScriptInterface(this)
+        jsInterface.setAppleLoginListener(this) // 设置Apple登录监听器
+        binding.webView.addJavascriptInterface(jsInterface, "Android")
 
         // 设置WebViewClient和WebChromeClient
-        binding.webView.webViewClient = ICloudWebClient(binding.progressBar)
+        webClient = ICloudWebClient(binding.progressBar, appleAuthHandler)
+        binding.webView.webViewClient = webClient
         binding.webView.webChromeClient = ICloudWebChromeClient()
 
         binding.webView.loadUrl(iCloudUrl)
@@ -124,6 +173,13 @@ class MainActivity : AppCompatActivity() {
     private fun openDownloadManager() {
         val intent = Intent(this, DownloadManagerActivity::class.java)
         startActivity(intent)
+    }
+    
+    // 实现 JavaScriptInterface.AppleLoginListener 接口
+    override fun onAppleLoginRequested() {
+        // 启动Apple登录
+        val clientId = getString(R.string.apple_login_client_id)
+        appleAuthHandler.startAuth(clientId)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
