@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">iCloud</string>
+    <string name="new_mail_notification">新邮件</string>
+    <string name="mail_notification_title">iCloud邮件</string>
+    <string name="mail_notification_content">您有%1$d封新邮件</string>
+</resources> 
