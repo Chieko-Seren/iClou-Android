@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.webkit.CookieManager
 import android.widget.Toast
@@ -22,6 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val PERMISSION_REQUEST_CODE = 1001
+    private val STORAGE_PERMISSION_REQUEST_CODE = 1002
     private val iCloudUrl = "https://www.icloud.com/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,10 +33,30 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.toolbar)
         setupWebView()
         setupSwipeRefresh()
         checkPermissions()
         startMailService()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_downloads -> {
+                openDownloadManager()
+                true
+            }
+            R.id.action_refresh -> {
+                binding.webView.reload()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun setupWebView() {
@@ -68,14 +91,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
+        
+        // 通知权限 (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    PERMISSION_REQUEST_CODE
-                )
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
             }
+        }
+        
+        // 存储权限 (Android 10以下)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+        
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                permissionsToRequest.toTypedArray(),
+                STORAGE_PERMISSION_REQUEST_CODE
+            )
         }
     }
 
@@ -83,14 +120,19 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, ICloudMailService::class.java)
         startService(intent)
     }
+    
+    private fun openDownloadManager() {
+        val intent = Intent(this, DownloadManagerActivity::class.java)
+        startActivity(intent)
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "通知权限已授予", Toast.LENGTH_SHORT).show()
+        if (requestCode == PERMISSION_REQUEST_CODE || requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                Toast.makeText(this, "权限已授予", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "需要通知权限来接收邮件提醒", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "需要请求的权限才能正常使用应用", Toast.LENGTH_LONG).show()
             }
         }
     }

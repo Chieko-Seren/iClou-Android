@@ -1,8 +1,10 @@
 package com.icloud.android.webview.webview
 
 import android.content.Context
+import android.content.Intent
 import android.webkit.JavascriptInterface
 import android.widget.Toast
+import com.icloud.android.webview.service.DownloadService
 import com.icloud.android.webview.util.NotificationHelper
 
 class JavaScriptInterface(private val context: Context) {
@@ -18,5 +20,27 @@ class JavaScriptInterface(private val context: Context) {
     @JavascriptInterface
     fun showToast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+    
+    @JavascriptInterface
+    fun downloadFile(url: String, suggestedFilename: String = "") {
+        // 检查URL是否有效
+        if (url.isBlank()) {
+            Toast.makeText(context, "无效的下载链接", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // 启动下载服务
+        val intent = Intent(context, DownloadService::class.java).apply {
+            action = DownloadService.ACTION_START_DOWNLOAD
+            putExtra(DownloadService.EXTRA_URL, url)
+            if (suggestedFilename.isNotBlank()) {
+                putExtra(DownloadService.EXTRA_FILE_NAME, suggestedFilename)
+            }
+        }
+        context.startService(intent)
+        
+        val fileName = if (suggestedFilename.isNotBlank()) suggestedFilename else url.substringAfterLast('/')
+        Toast.makeText(context, "开始下载: $fileName", Toast.LENGTH_SHORT).show()
     }
 } 
